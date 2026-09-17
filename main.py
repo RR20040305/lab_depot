@@ -1,259 +1,76 @@
-import json
-import os
-from datetime import datetime, date
-
-# ---------- Файл для хранения данных ----------
-DATA_FILE = "data.json"
-
-# ---------- Загрузка и сохранение ----------
-def load_data():
-    """Загружает данные из JSON-файла. Если файла нет — возвращает пустую структуру."""
-    if not os.path.exists(DATA_FILE):
-        return {"equipment": {}, "bookings": []}
-    with open(DATA_FILE, "r", encoding="utf-8") as f:
-        return json.load(f)
+import equipment
+import laboratory
+import employee
+import issue
 
 
-def save_data(data):
-    """Сохраняет данные в JSON-файл."""
-    with open(DATA_FILE, "w", encoding="utf-8") as f:
-        json.dump(data, f, ensure_ascii=False, indent=4)
-
-
-# ---------- 1. Добавление оборудования ----------
-def add_equipment(data):
-    inv_num = input("Введите инвентарный номер: ").strip()
-
-    if inv_num in data["equipment"]:
-        print(f"Ошибка: оборудование с номером {inv_num} уже существует.")
-        return
-
-    name = input("Введите название оборудования: ").strip()
-    status = input("Введите состояние (исправно/в ремонте): ").strip()
-
-    if status not in ("исправно", "в ремонте"):
-        print("Ошибка: допустимые состояния — 'исправно' или 'в ремонте'.")
-        return
-
-    data["equipment"][inv_num] = {"name": name, "status": status}
-    save_data(data)
-    print(f"Оборудование {inv_num} успешно добавлено.")
-
-
-# ---------- 2. Редактирование ----------
-def edit_equipment(data):
-    inv_num = input("Введите инвентарный номер для редактирования: ").strip()
-
-    if inv_num not in data["equipment"]:
-        print(f"Ошибка: оборудование с номером {inv_num} не найдено.")
-        return
-
-    record = data["equipment"][inv_num]
-    print(f"Текущие данные: {record}")
-
-    name = input(f"Новое название (Enter — оставить '{record['name']}'): ").strip()
-    status = input(f"Новое состояние (Enter — оставить '{record['status']}'): ").strip()
-
-    if name:
-        record["name"] = name
-    if status:
-        if status not in ("исправно", "в ремонте"):
-            print("Ошибка: недопустимое состояние.")
-            return
-        record["status"] = status
-
-    save_data(data)
-    print(f"Запись {inv_num} обновлена: {record}")
-
-
-# ---------- 3. Удаление ----------
-def delete_equipment(data):
-    inv_num = input("Введите инвентарный номер для удаления: ").strip()
-
-    if inv_num not in data["equipment"]:
-        print(f"Ошибка: оборудование с номером {inv_num} не найдено.")
-        return
-
-    # Проверим, нет ли активной брони на это оборудование
-    active = [b for b in data["bookings"]
-              if b["inv_num"] == inv_num and b["status"] == "активна"]
-    if active:
-        print("Ошибка: оборудование выдано, сначала отмените бронь.")
-        return
-
-    confirm = input(f"Удалить оборудование {inv_num}? (да/нет): ").strip().lower()
-    if confirm == "да":
-        del data["equipment"][inv_num]
-        save_data(data)
-        print(f"Оборудование {inv_num} удалено.")
-    else:
-        print("Удаление отменено.")
-
-
-# ---------- 4. Проверка доступности ----------
-def check_availability(data):
-    inv_num = input("Введите инвентарный номер оборудования: ").strip()
-
-    if inv_num not in data["equipment"]:
-        print(f"Ошибка: оборудование с номером {inv_num} не найдено.")
-        return
-
-    status = data["equipment"][inv_num]["status"]
-
-    if status == "в ремонте":
-        print(f"Оборудование {inv_num} в ремонте – выдача невозможна.")
-        return
-
-    active = [b for b in data["bookings"]
-              if b["inv_num"] == inv_num and b["status"] == "активна"]
-    if active:
-        print(f"Оборудование {inv_num} уже выдано. "
-              f"Дата возврата: {active[0]['return_date']}")
-    else:
-        print(f"Оборудование {inv_num} доступно для выдачи.")
-
-
-# ---------- 5. Добавление брони (выдача) ----------
-def add_booking(data):
-    inv_num = input("Введите инвентарный номер оборудования: ").strip()
-
-    if inv_num not in data["equipment"]:
-        print("Ошибка: оборудование не найдено.")
-        return
-
-    if data["equipment"][inv_num]["status"] == "в ремонте":
-        print("Ошибка: оборудование в ремонте.")
-        return
-
-    active = [b for b in data["bookings"]
-              if b["inv_num"] == inv_num and b["status"] == "активна"]
-    if active:
-        print("Ошибка: оборудование уже выдано.")
-        return
-
-    employee = input("Введите ФИО сотрудника: ").strip()
-    date_str = input("Введите дату возврата (ГГГГ-ММ-ДД): ").strip()
-
-    try:
-        return_date = datetime.strptime(date_str, "%Y-%m-%d").date()
-    except ValueError:
-        print("Ошибка: неверный формат даты.")
-        return
-
-    if return_date < date.today():
-        print("Ошибка: дата возврата не может быть в прошлом.")
-        return
-
-    booking = {
-        "inv_num": inv_num,
-        "employee": employee,
-        "return_date": str(return_date),
-        "status": "активна"
-    }
-    data["bookings"].append(booking)
-    save_data(data)
-    print(f"Оборудование {inv_num} выдано сотруднику {employee}.")
-
-
-# ---------- 6. Отмена брони (возврат) ----------
-def cancel_booking(data):
-    inv_num = input("Введите инвентарный номер: ").strip()
-
-    for booking in data["bookings"]:
-        if booking["inv_num"] == inv_num and booking["status"] == "активна":
-            booking["status"] = "завершена"
-            save_data(data)
-            print(f"Бронь на оборудование {inv_num} завершена.")
-            return
-
-    print("Активная бронь не найдена.")
-
-
-# ---------- 7. Поиск ----------
-def search_equipment(data):
-    query = input("Введите часть названия для поиска: ").strip().lower()
-
-    results = [(num, rec) for num, rec in data["equipment"].items()
-               if query in rec["name"].lower()]
-
-    if not results:
-        print("Ничего не найдено.")
-        return
-
-    print(f"\nНайдено записей: {len(results)}")
-    for num, rec in results:
-        print(f"{num}: {rec['name']} — {rec['status']}")
-
-
-# ---------- 8. Сортировка ----------
-def sort_equipment(data):
-    print("Сортировать по: 1 — номеру, 2 — названию")
-    choice = input("Выбор: ").strip()
-
-    if choice == "1":
-        items = sorted(data["equipment"].items(), key=lambda x: x[0])
-    elif choice == "2":
-        items = sorted(data["equipment"].items(), key=lambda x: x[1]["name"])
-    else:
-        print("Неверный выбор.")
-        return
-
-    for num, rec in items:
-        print(f"{num}: {rec['name']} — {rec['status']}")
-
-
-# ---------- 9. Статистика ----------
-def show_statistics(data):
-    total = len(data["equipment"])
-    in_repair = sum(1 for r in data["equipment"].values() if r["status"] == "в ремонте")
-    active_bookings = sum(1 for b in data["bookings"] if b["status"] == "активна")
-
-    print("\n--- Статистика ---")
-    print(f"Всего оборудования: {total}")
-    print(f"В ремонте: {in_repair}")
-    print(f"Активных выдач: {active_bookings}")
-    print(f"Завершённых выдач: {sum(1 for b in data['bookings'] if b['status'] == 'завершена')}")
-
-
-# ---------- Главное меню ----------
 def main():
-    data = load_data()
+    eq = equipment.load()
+    lab = laboratory.load()
+    emp = employee.load()
+    iss = issue.load()
 
     while True:
         print("\n--- Меню ---")
-        print("1. Добавить оборудование")
-        print("2. Редактировать оборудование")
-        print("3. Удалить оборудование")
-        print("4. Проверить доступность")
-        print("5. Выдать оборудование")
-        print("6. Вернуть оборудование")
-        print("7. Поиск")
-        print("8. Сортировка")
-        print("9. Статистика")
+        print("1. Оборудование")
+        print("2. Лаборатории")
+        print("3. Сотрудники")
+        print("4. Выдачи")
         print("0. Выход")
 
-        choice = input("Выберите действие: ").strip()
+        choice = input("Выбор: ").strip()
 
         if choice == "1":
-            add_equipment(data)
+            print("1.Добавить 2.Изменить 3.Удалить 4.Поиск 5.Сортировка")
+            c = input("Действие: ").strip()
+            if c == "1":
+                equipment.add(eq)
+            elif c == "2":
+                equipment.edit(eq)
+            elif c == "3":
+                equipment.delete(eq)
+            elif c == "4":
+                equipment.search(eq)
+            elif c == "5":
+                equipment.sort(eq)
         elif choice == "2":
-            edit_equipment(data)
+            print("1.Добавить 2.Изменить 3.Удалить 4.Поиск")
+            c = input("Действие: ").strip()
+            if c == "1":
+                laboratory.add(lab)
+            elif c == "2":
+                laboratory.edit(lab)
+            elif c == "3":
+                laboratory.delete(lab)
+            elif c == "4":
+                laboratory.search(lab)
         elif choice == "3":
-            delete_equipment(data)
+            print("1.Добавить 2.Изменить 3.Удалить 4.Поиск")
+            c = input("Действие: ").strip()
+            if c == "1":
+                employee.add(emp)
+            elif c == "2":
+                employee.edit(emp)
+            elif c == "3":
+                employee.delete(emp)
+            elif c == "4":
+                employee.search(emp)
         elif choice == "4":
-            check_availability(data)
-        elif choice == "5":
-            add_booking(data)
-        elif choice == "6":
-            cancel_booking(data)
-        elif choice == "7":
-            search_equipment(data)
-        elif choice == "8":
-            sort_equipment(data)
-        elif choice == "9":
-            show_statistics(data)
+            print("1.Выдать 2.Вернуть 3.Проверить 4.Статистика")
+            c = input("Действие: ").strip()
+            if c == "1":
+                issue.add(iss)
+            elif c == "2":
+                issue.cancel(iss)
+            elif c == "3":
+                issue.check(iss)
+            elif c == "4":
+                issue.statistics(iss)
         elif choice == "0":
-            save_data(data)
+            equipment.save(eq)
+            laboratory.save(lab)
+            employee.save(emp)
+            issue.save(iss)
             print("Выход.")
             break
         else:
