@@ -1,14 +1,65 @@
-import equipment
-import laboratory
-import employee
-import issue
+from models import employees, equipment, issues, laboratories
 
 
-def main():
+def menu_equipment(data):
+    print("1.Добавить 2.Изменить 3.Удалить 4.Поиск 5.Сортировка")
+    c = input("Действие: ").strip()
+    if c == "1":
+        equipment.add(data)
+    elif c == "2":
+        equipment.edit(data)
+    elif c == "3":
+        equipment.delete(data)
+    elif c == "4":
+        equipment.search(data)
+    elif c == "5":
+        equipment.sort(data)
+
+
+def menu_laboratories(data):
+    print("1.Добавить 2.Изменить 3.Удалить 4.Поиск")
+    c = input("Действие: ").strip()
+    if c == "1":
+        laboratories.add(data)
+    elif c == "2":
+        laboratories.edit(data)
+    elif c == "3":
+        laboratories.delete(data)
+    elif c == "4":
+        laboratories.search(data)
+
+
+def menu_employees(data):
+    print("1.Добавить 2.Изменить 3.Удалить 4.Поиск")
+    c = input("Действие: ").strip()
+    if c == "1":
+        employees.add(data)
+    elif c == "2":
+        employees.edit(data)
+    elif c == "3":
+        employees.delete(data)
+    elif c == "4":
+        employees.search(data)
+
+
+def menu_issues(data, equipment_list, employees_list):
+    print("1.Выдать 2.Вернуть 3.Проверить 4.Статистика")
+    c = input("Действие: ").strip()
+    if c == "1":
+        issues.add(data, equipment_list, employees_list)
+    elif c == "2":
+        issues.cancel(data)
+    elif c == "3":
+        issues.check(data)
+    elif c == "4":
+        issues.statistics(data)
+
+
+def main() -> None:
     eq = equipment.load()
-    lab = laboratory.load()
-    emp = employee.load()
-    iss = issue.load()
+    lab = laboratories.load()
+    emp = employees.load()
+    iss = issues.load(eq, emp)
 
     while True:
         print("\n--- Меню ---")
@@ -21,56 +72,18 @@ def main():
         choice = input("Выбор: ").strip()
 
         if choice == "1":
-            print("1.Добавить 2.Изменить 3.Удалить 4.Поиск 5.Сортировка")
-            c = input("Действие: ").strip()
-            if c == "1":
-                equipment.add(eq)
-            elif c == "2":
-                equipment.edit(eq)
-            elif c == "3":
-                equipment.delete(eq)
-            elif c == "4":
-                equipment.search(eq)
-            elif c == "5":
-                equipment.sort(eq)
+            menu_equipment(eq)
         elif choice == "2":
-            print("1.Добавить 2.Изменить 3.Удалить 4.Поиск")
-            c = input("Действие: ").strip()
-            if c == "1":
-                laboratory.add(lab)
-            elif c == "2":
-                laboratory.edit(lab)
-            elif c == "3":
-                laboratory.delete(lab)
-            elif c == "4":
-                laboratory.search(lab)
+            menu_laboratories(lab)
         elif choice == "3":
-            print("1.Добавить 2.Изменить 3.Удалить 4.Поиск")
-            c = input("Действие: ").strip()
-            if c == "1":
-                employee.add(emp)
-            elif c == "2":
-                employee.edit(emp)
-            elif c == "3":
-                employee.delete(emp)
-            elif c == "4":
-                employee.search(emp)
+            menu_employees(emp)
         elif choice == "4":
-            print("1.Выдать 2.Вернуть 3.Проверить 4.Статистика")
-            c = input("Действие: ").strip()
-            if c == "1":
-                issue.add(iss)
-            elif c == "2":
-                issue.cancel(iss)
-            elif c == "3":
-                issue.check(iss)
-            elif c == "4":
-                issue.statistics(iss)
+            menu_issues(iss, eq, emp)
         elif choice == "0":
             equipment.save(eq)
-            laboratory.save(lab)
-            employee.save(emp)
-            issue.save(iss)
+            laboratories.save(lab)
+            employees.save(emp)
+            issues.save(iss)
             print("Выход.")
             break
         else:
