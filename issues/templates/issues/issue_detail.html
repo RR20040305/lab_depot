@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}Выдача — lab_depot{% endblock %}
+
+{% block content %}
+    {% if issue %}
+        <div class="card">
+            <div class="card-body">
+                <h1 class="card-title">Выдача №{{ issue.id }}</h1>
+
+                <p class="card-text">
+                    <strong>Оборудование:</strong>
+                    <a href="{% url 'equipment:detail' issue.equipment.inv_num %}">
+                        {{ issue.equipment.name }} ({{ issue.equipment.inv_num }})
+                    </a>
+                </p>
+                <p class="card-text">
+                    <strong>Сотрудник:</strong>
+                    <a href="{% url 'employees:detail' issue.employee.emp_id %}">
+                        {{ issue.employee.fio }}
+                    </a>
+                </p>
+                <p class="card-text">
+                    <strong>Дата возврата:</strong> {{ issue.return_date }}
+                </p>
+                <p class="card-text">
+                    <strong>Статус:</strong>
+                    {% include "issues/includes/issue_status.html" %}
+                </p>
+            </div>
+        </div>
+    {% else %}
+        <h1 class="text-danger">Выдача не найдена</h1>
+        <p>Выдачи с указанным номером не существует.</p>
+    {% endif %}
+
+    <a href="{% url 'issues:list' %}"
+       class="btn btn-outline-secondary mt-3">
+        ← к списку выдач
+    </a>
+{% endblock %}

@@ -1,0 +1,19 @@
+<div class="col-md-6 col-lg-4">
+    <article class="card equipment-card mb-3">
+        <div class="card-body">
+            <h2 class="card-title">
+                {{ eq.name|default:"Без названия" }}
+            </h2>
+            <p class="card-text">
+                <strong>Инвентарный номер:</strong> {{ eq.inv_num }}
+            </p>
+            <p class="card-text">
+                <strong>Состояние:</strong> {{ eq.status }}
+            </p>
+            <a href="{% url 'equipment:detail' eq.inv_num %}"
+               class="btn btn-primary">
+                Подробнее
+            </a>
+        </div>
+    </article>
+</div>

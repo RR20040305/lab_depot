@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}Лаборатория — lab_depot{% endblock %}
+
+{% block content %}
+    {% if laboratory %}
+        <div class="card">
+            <div class="card-body">
+                <h1 class="card-title">Лаборатория {{ laboratory.lab_id }}</h1>
+                <p class="card-text">
+                    <strong>Ответственный:</strong> {{ laboratory.responsible }}
+                </p>
+                <p class="card-text">
+                    <strong>Расположение:</strong> {{ laboratory.location }}
+                </p>
+            </div>
+        </div>
+    {% else %}
+        <h1 class="text-danger">Лаборатория не найдена</h1>
+        <p>Лаборатории с указанным номером не существует.</p>
+    {% endif %}
+
+    <a href="{% url 'laboratories:list' %}"
+       class="btn btn-outline-secondary mt-3">
+        ← к списку лабораторий
+    </a>
+{% endblock %}

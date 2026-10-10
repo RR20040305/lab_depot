@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}Сотрудник — lab_depot{% endblock %}
+
+{% block content %}
+    {% if employee %}
+        <div class="card">
+            <div class="card-body">
+                <h1 class="card-title">{{ employee.fio }}</h1>
+                <p class="card-text">
+                    <strong>Табельный номер:</strong> {{ employee.emp_id }}
+                </p>
+                <p class="card-text">
+                    <strong>Должность:</strong> {{ employee.position }}
+                </p>
+                <p class="card-text">
+                    <strong>Лаборатория:</strong> {{ employee.lab }}
+                </p>
+            </div>
+        </div>
+    {% else %}
+        <h1 class="text-danger">Сотрудник не найден</h1>
+        <p>Сотрудника с указанным табельным номером не существует.</p>
+    {% endif %}
+
+    <a href="{% url 'employees:list' %}"
+       class="btn btn-outline-secondary mt-3">
+        ← к списку сотрудников
+    </a>
+{% endblock %}

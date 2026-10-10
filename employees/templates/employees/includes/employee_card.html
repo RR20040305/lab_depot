@@ -1,0 +1,15 @@
+<div class="col-md-6 col-lg-4">
+    <article class="card employee-card mb-3">
+        <div class="card-body">
+            <h2 class="card-title">{{ emp.fio }}</h2>
+            <p class="card-text">
+                <strong>Должность:</strong> {{ emp.position }}
+            </p>
+            <p class="card-text">
+                <strong>Лаборатория:</strong> {{ emp.lab }}
+            </p>
+            <a href="{% url 'employees:detail' emp.emp_id %}"
+               class="btn btn-primary">Подробнее</a>
+        </div>
+    </article>
+</div>

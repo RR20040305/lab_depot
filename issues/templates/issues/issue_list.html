@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block title %}Выдачи — lab_depot{% endblock %}
+
+{% block content %}
+<h1>Выдачи</h1>
+
+<p>Всего: {{ issue_list|length }}</p>
+
+<ul class="list-group">
+    {% for issue in issue_list %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            <a href="{% url 'issues:detail' issue.id %}">
+                {{ issue.equipment.name }} — {{ issue.employee.fio }}
+                (до {{ issue.return_date }})
+            </a>
+            {% include "issues/includes/issue_status.html" %}
+        </li>
+    {% empty %}
+        <li class="list-group-item">Выдачи отсутствуют.</li>
+    {% endfor %}
+</ul>
+{% endblock %}

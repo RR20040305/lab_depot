@@ -1,0 +1,15 @@
+<div class="col-md-6 col-lg-4">
+    <article class="card laboratory-card mb-3">
+        <div class="card-body">
+            <h2 class="card-title">Лаборатория {{ lab.lab_id }}</h2>
+            <p class="card-text">
+                <strong>Ответственный:</strong> {{ lab.responsible }}
+            </p>
+            <p class="card-text">
+                <strong>Расположение:</strong> {{ lab.location }}
+            </p>
+            <a href="{% url 'laboratories:detail' lab.lab_id %}"
+               class="btn btn-primary">Подробнее</a>
+        </div>
+    </article>
+</div>

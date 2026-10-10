@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}lab_depot — главная{% endblock %}
+
+{% block content %}
+<h1 class="display-4">lab_depot</h1>
+<p class="lead">Система учёта лабораторного оборудования.</p>
+
+<p>Основные разделы:</p>
+
+<a href="{% url 'equipment:list' %}" class="btn btn-primary me-2">Оборудование</a>
+<a href="{% url 'laboratories:list' %}" class="btn btn-primary me-2">Лаборатории</a>
+<a href="{% url 'employees:list' %}" class="btn btn-primary me-2">Сотрудники</a>
+<a href="{% url 'issues:list' %}" class="btn btn-secondary">Выдачи</a>
+{% endblock %}

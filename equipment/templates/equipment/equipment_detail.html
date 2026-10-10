@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {% if equipment %}{{ equipment.name }} — lab_depot{% else %}Оборудование не найдено{% endblock %}{% endif %}
+{% endblock %}
+
+{% block content %}
+    {% if equipment %}
+        <div class="card">
+            <div class="card-body">
+                <h1 class="card-title">{{ equipment.name }}</h1>
+                <p class="card-text">
+                    <strong>Инвентарный номер:</strong> {{ equipment.inv_num }}
+                </p>
+                <p class="card-text">
+                    <strong>Состояние:</strong> {{ equipment.status }}
+                </p>
+                <p class="card-text">
+                    <strong>Статус:</strong>
+                    {% if busy %}
+                        <span class="badge bg-warning">выдано</span>
+                    {% else %}
+                        <span class="badge bg-success">доступно</span>
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+    {% else %}
+        <h1 class="text-danger">Оборудование не найдено</h1>
+        <p>Оборудование с указанным инвентарным номером отсутствует.</p>
+    {% endif %}
+
+    <a href="{% url 'equipment:list' %}"
+       class="btn btn-outline-secondary mt-3">
+        ← к списку оборудования
+    </a>
+{% endblock %}

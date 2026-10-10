@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}Лаборатории — lab_depot{% endblock %}
+
+{% block content %}
+<h1>Лаборатории</h1>
+
+<p>Всего: {{ laboratory_list|length }}</p>
+
+<div class="row">
+    {% for lab in laboratory_list %}
+        {% include "laboratories/includes/laboratory_card.html" %}
+    {% empty %}
+        <p>Лаборатории не найдены.</p>
+    {% endfor %}
+</div>
+{% endblock %}

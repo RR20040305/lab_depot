@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}Оборудование — lab_depot{% endblock %}
+
+{% block content %}
+<h1>Оборудование</h1>
+
+<p>Всего единиц: {{ equipment_list|length }}</p>
+
+<div class="row">
+    {% for eq in equipment_list %}
+        {% include "equipment/includes/equipment_card.html" %}
+    {% empty %}
+        <p>Оборудование не найдено.</p>
+    {% endfor %}
+</div>
+{% endblock %}

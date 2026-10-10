@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}Сотрудники — lab_depot{% endblock %}
+
+{% block content %}
+<h1>Сотрудники</h1>
+
+<p>Всего: {{ employee_list|length }}</p>
+
+<div class="row">
+    {% for emp in employee_list %}
+        {% include "employees/includes/employee_card.html" %}
+    {% empty %}
+        <p>Сотрудники не найдены.</p>
+    {% endfor %}
+</div>
+{% endblock %}

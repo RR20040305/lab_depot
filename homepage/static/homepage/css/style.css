@@ -1,0 +1,28 @@
+body {
+    min-height: 100vh;
+    background-color: #f8f9fa;
+}
+
+.labdepot-logo {
+    width: 120px;
+    height: auto;
+    margin: 1rem;
+}
+
+.equipment-card,
+.laboratory-card,
+.employee-card {
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    transition: box-shadow 0.2s;
+}
+
+.equipment-card:hover,
+.laboratory-card:hover,
+.employee-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.issue-status {
+    font-weight: 600;
+}
