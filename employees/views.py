@@ -1,23 +1,39 @@
+import sqlite3
 from django.shortcuts import render
 
-from models import employees as employees_models
+DB_PATH = "data/lab_depot.sqlite"
 
 
 def employees(request):
-    employee_list = employees_models.load()
-    return render(
-        request,
-        'employees/employee_list.html',
-        {'employee_list': employee_list},
-    )
-
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    employees_list = conn.execute("""
+        SELECT e.emp_id, e.fio, e.position, e.lab_id, l.location AS lab_location
+        FROM employees e
+        LEFT JOIN laboratories l ON e.lab_id = l.lab_id
+        ORDER BY e.fio;
+    """).fetchall()
+    conn.close()
+    return render(request, 'employees/employee_list.html', {'employees_list': employees_list})
 
 def employee_detail(request, emp_id):
-    employee_list = employees_models.load()
-    employee = employees_models.find_by_id(employee_list, emp_id)
-    return render(
-        request,
-        'employees/employee_detail.html',
-        {'employee': employee},
-        status=404 if employee is None else 200,
-    )
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    
+    emp = conn.execute("""
+        SELECT emp_id, fio, position, lab_id 
+        FROM employees 
+        WHERE emp_id = ?;
+    """, (emp_id,)).fetchone()
+    
+    if emp is None:
+        conn.close()
+        return render(
+            request, 
+            'employees/employee_detail.html', 
+            {'employee': None}, 
+            status=404
+        )
+        
+    conn.close()
+    return render(request, 'employees/employee_detail.html', {'employee': emp})

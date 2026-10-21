@@ -3,15 +3,30 @@
 {% block title %}Лаборатории — lab_depot{% endblock %}
 
 {% block content %}
-<h1>Лаборатории</h1>
+<h1 class="mb-4">Лаборатории</h1>
 
-<p>Всего: {{ laboratory_list|length }}</p>
+<p class="lead">Всего: {{ laboratories_list|length }}</p>
 
 <div class="row">
-    {% for lab in laboratory_list %}
-        {% include "laboratories/includes/laboratory_card.html" %}
+    {% for lab in laboratories_list %}
+        <div class="col-md-6 col-lg-4 mb-3">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Лаборатория {{ lab.lab_id }}</h5>
+                    <p class="card-text">
+                        <strong>Ответственный:</strong> {{ lab.responsible }}<br>
+                        <strong>Расположение:</strong> {{ lab.location }}
+                    </p>
+                    <a href="{% url 'laboratories:detail' lab.lab_id %}" class="btn btn-primary btn-sm">
+                        Подробнее
+                    </a>
+                </div>
+            </div>
+        </div>
     {% empty %}
-        <p>Лаборатории не найдены.</p>
+        <div class="col-12">
+            <p class="alert alert-info">Лаборатории не найдены.</p>
+        </div>
     {% endfor %}
 </div>
 {% endblock %}

@@ -9,9 +9,14 @@
 
 <div class="row">
     {% for eq in equipment_list %}
-        {% include "equipment/includes/equipment_card.html" %}
+        <div class="card">
+            <!-- Обращаемся к полям через точку: eq.inv_num, eq.name, eq.status -->
+            <h2>{{ eq.name }}</h2>
+            <p>Инв. номер: {{ eq.inv_num }}</p>
+            <p>Состояние: {{ eq.status }}</p>
+        </div>
     {% empty %}
-        <p>Оборудование не найдено.</p>
+        <p>Оборудования нет в базе.</p>
     {% endfor %}
 </div>
 {% endblock %}

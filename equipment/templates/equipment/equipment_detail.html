@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block title %}
-    {% if equipment %}{{ equipment.name }} — lab_depot{% else %}Оборудование не найдено{% endblock %}{% endif %}
+    {% if equipment %}{{ equipment.name }} — lab_depot{% else %}Оборудование не найдено{% endif %}
 {% endblock %}
 
 {% block content %}
@@ -17,7 +17,7 @@
                 </p>
                 <p class="card-text">
                     <strong>Статус:</strong>
-                    {% if busy %}
+                    {% if busy_info %}
                         <span class="badge bg-warning">выдано</span>
                     {% else %}
                         <span class="badge bg-success">доступно</span>
@@ -27,11 +27,9 @@
         </div>
     {% else %}
         <h1 class="text-danger">Оборудование не найдено</h1>
-        <p>Оборудование с указанным инвентарным номером отсутствует.</p>
     {% endif %}
 
-    <a href="{% url 'equipment:list' %}"
-       class="btn btn-outline-secondary mt-3">
+    <a href="{% url 'equipment:list' %}" class="btn btn-outline-secondary mt-3">
         ← к списку оборудования
     </a>
 {% endblock %}

@@ -1,36 +1,66 @@
+import sqlite3
 from django.shortcuts import render
 
-from models import equipment as equipment_models
-from models import employees as employees_models
-from models import issues as issues_models
+DB_PATH = "data/lab_depot.sqlite"
 
 
 def equipment(request):
-    equipment_list = equipment_models.load()
-    context = {
-        'equipment_list': equipment_list,
-    }
-    return render(request, 'equipment/equipment_list.html', context)
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    equipment_list = conn.execute("""
+        SELECT inv_num, name, status FROM equipment ORDER BY name;
+    """).fetchall()
+    conn.close()
+
+    return render(request, 'equipment/equipment_list.html', {'equipment_list': equipment_list})
 
 
 def equipment_detail(request, inv_num):
-    equipment_list = equipment_models.load()
-    eq = equipment_models.find_by_id(equipment_list, inv_num)
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    
+    # Получаем оборудование
+    eq = conn.execute("""
+        SELECT inv_num, name, status FROM equipment WHERE inv_num = ?;
+    """, (inv_num,)).fetchone()
 
-    if eq is not None:
-        employees_list = employees_models.load()
-        issues_list = issues_models.load(equipment_list, employees_list)
-        busy = issues_models.is_equipment_busy(issues_list, eq)
-    else:
-        busy = False
+    if eq is None:
+        conn.close()
+        return render(request, 'equipment/equipment_detail.html', {'equipment': None}, status=404)
 
-    context = {
+    # Проверяем, выдано ли оно сейчас (JOIN)
+    busy_info = conn.execute("""
+        SELECT i.return_date, emp.fio 
+        FROM issues i
+        JOIN employees emp ON i.emp_id = emp.emp_id
+        WHERE i.inv_num = ? AND i.status = 'активна';
+    """, (inv_num,)).fetchone()
+    conn.close()
+
+    return render(request, 'equipment/equipment_detail.html', {
         'equipment': eq,
-        'busy': busy,
-    }
-    return render(
-        request,
-        'equipment/equipment_detail.html',
-        context,
-        status=404 if eq is None else 200,
-    )
+        'busy_info': busy_info,
+    })
+
+def available_equipment(request):
+    status_filter = request.GET.get('status', 'исправно')
+    
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    
+    # Ищем оборудование нужного статуса, которое НЕ ВЫДАНО (нет активных выдач)
+    available = conn.execute("""
+        SELECT inv_num, name, status
+        FROM equipment
+        WHERE status = ?
+          AND inv_num NOT IN (
+              SELECT inv_num FROM issues WHERE status = 'активна'
+          )
+        ORDER BY name;
+    """, (status_filter,)).fetchall()
+    conn.close()
+
+    return render(request, 'equipment/available.html', {
+        'available_list': available,
+        'status_filter': status_filter,
+    })
