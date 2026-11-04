@@ -18,9 +18,9 @@
                 <p class="card-text">
                     <strong>Статус:</strong>
                     {% if busy_info %}
-                        <span class="badge bg-warning">выдано</span>
+                        <span class="badge bg-warning">Выдано до {{ busy_info.return_date|date:"d.m.Y" }} ({{ busy_info.employee.fio }})</span>
                     {% else %}
-                        <span class="badge bg-success">доступно</span>
+                        <span class="badge bg-success">Доступно</span>
                     {% endif %}
                 </p>
             </div>

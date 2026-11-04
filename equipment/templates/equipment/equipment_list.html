@@ -10,7 +10,6 @@
 <div class="row">
     {% for eq in equipment_list %}
         <div class="card">
-            <!-- Обращаемся к полям через точку: eq.inv_num, eq.name, eq.status -->
             <h2>{{ eq.name }}</h2>
             <p>Инв. номер: {{ eq.inv_num }}</p>
             <p>Состояние: {{ eq.status }}</p>

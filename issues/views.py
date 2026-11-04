@@ -1,47 +1,52 @@
-import sqlite3
-from django.shortcuts import render
-
-DB_PATH = "data/lab_depot.sqlite"
-
+from django.shortcuts import render, get_object_or_404
+from django.core.paginator import Paginator
+from django.db.models import Count
+from .models import Issue
+from equipment.models import Equipment
 
 def issues(request):
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
-    issues_list = conn.execute("""
-        SELECT i.id, i.return_date, i.status, 
-               e.name AS eq_name, e.inv_num,
-               emp.fio AS emp_name
-        FROM issues i
-        LEFT JOIN equipment e ON i.inv_num = e.inv_num
-        LEFT JOIN employees emp ON i.emp_id = emp.emp_id
-        ORDER BY i.return_date DESC;
-    """).fetchall()
-    conn.close()
-    return render(request, 'issues/issue_list.html', {'issues_list': issues_list})
+    # Базовый QuerySet с JOIN-оптимизацией
+    qs = Issue.objects.select_related('equipment', 'employee').all()
+
+    # Фильтрация
+    status_filter = request.GET.get('status')
+    if status_filter:
+        qs = qs.filter(status=status_filter)
+
+    # Сортировка
+    sort = request.GET.get('sort', 'date_desc')
+    if sort == 'date_asc':
+        qs = qs.order_by('return_date')
+    elif sort == 'eq_name':
+        qs = qs.order_by('equipment__name')
+    else:
+        qs = qs.order_by('-return_date')
+
+    # Пагинация (по 5 записей)
+    paginator = Paginator(qs, 5)
+    page_obj = paginator.get_page(request.GET.get('page'))
+
+    return render(request, 'issues/issue_list.html', {
+        'issues_list': page_obj,
+        'page_obj': page_obj,
+        'status_filter': status_filter,
+        'sort': sort,
+    })
 
 def issue_detail(request, issue_id):
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
-    
-    # Запрос с JOIN, чтобы получить и данные выдачи, и ФИО сотрудника, и название оборудования
-    issue = conn.execute("""
-        SELECT i.id, i.return_date, i.status, 
-               e.name AS eq_name, e.inv_num,
-               emp.fio AS emp_name, emp.emp_id
-        FROM issues i
-        JOIN equipment e ON i.inv_num = e.inv_num
-        JOIN employees emp ON i.emp_id = emp.emp_id
-        WHERE i.id = ?;
-    """, (issue_id,)).fetchone()
-    
-    if issue is None:
-        conn.close()
-        return render(
-            request, 
-            'issues/issue_detail.html', 
-            {'issue': None}, 
-            status=404
-        )
-        
-    conn.close()
+    issue = get_object_or_404(Issue.objects.select_related('equipment', 'employee'), pk=issue_id)
     return render(request, 'issues/issue_detail.html', {'issue': issue})
+
+def statistics(request):
+    # ORM: Агрегация и аннотирование
+    total_eq = Equipment.objects.aggregate(total=Count('inv_num'))['total']
+    active_issues = Issue.objects.filter(status='активна').count()
+    
+    # Аннотирование: считаем количество выдач для каждого оборудования
+    eq_stats = Equipment.objects.annotate(issue_count=Count('issues')).order_by('-issue_count')
+
+    return render(request, 'issues/statistics.html', {
+        'total_eq': total_eq,
+        'active_issues': active_issues,
+        'eq_stats': eq_stats,
+    })

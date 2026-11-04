@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Статистика</h1>
+<div class="card mb-4">
+    <div class="card-body">
+        <p>Всего единиц оборудования: <strong>{{ total_eq }}</strong></p>
+        <p>Активных выдач: <strong>{{ active_issues }}</strong></p>
+    </div>
+</div>
+
+<h2>Популярность оборудования</h2>
+<ul class="list-group">
+    {% for eq in eq_stats %}
+        <li class="list-group-item d-flex justify-content-between">
+            <span>{{ eq.name }} ({{ eq.inv_num }})</span>
+            <span class="badge bg-primary">{{ eq.issue_count }} выдач</span>
+        </li>
+    {% endfor %}
+</ul>
+{% endblock %}

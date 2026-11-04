@@ -5,19 +5,58 @@
 {% block content %}
 <h1>Выдачи</h1>
 
-<p>Всего: {{ issues_list|length }}</p>
+<!-- Фильтрация и сортировка -->
+<form method="get" class="row g-3 mb-4">
+    <div class="col-auto">
+        <select name="status" class="form-select">
+            <option value="">Все статусы</option>
+            <option value="активна" {% if status_filter == 'активна' %}selected{% endif %}>Активна</option>
+            <option value="завершена" {% if status_filter == 'завершена' %}selected{% endif %}>Завершена</option>
+        </select>
+    </div>
+    <div class="col-auto">
+        <select name="sort" class="form-select">
+            <option value="date_desc" {% if sort == 'date_desc' %}selected{% endif %}>Сначала новые</option>
+            <option value="date_asc" {% if sort == 'date_asc' %}selected{% endif %}>Сначала старые</option>
+            <option value="eq_name" {% if sort == 'eq_name' %}selected{% endif %}>По названию оборудования</option>
+        </select>
+    </div>
+    <div class="col-auto">
+        <button type="submit" class="btn btn-primary">Применить</button>
+    </div>
+</form>
 
-<ul class="list-group">
+<ul class="list-group mb-4">
     {% for issue in issues_list %}
         <li class="list-group-item d-flex justify-content-between">
             <span>
-                {{ issue.eq_name }} ({{ issue.inv_num }}) → 
-                {{ issue.emp_name }} (до {{ issue.return_date }})
+                <a href="{% url 'equipment:detail' issue.equipment.inv_num %}">{{ issue.equipment.name }}</a> 
+                → {{ issue.employee.fio }} 
+                (до {{ issue.return_date|date:"d.m.Y" }})
             </span>
-            <span class="badge bg-success">{{ issue.status }}</span>
+            {% if issue.status == 'активна' %}
+                <span class="badge bg-success">{{ issue.status }}</span>
+            {% else %}
+                <span class="badge bg-secondary">{{ issue.status }}</span>
+            {% endif %}
         </li>
     {% empty %}
-        <li class="list-group-item">Выдач пока нет.</li>
+        <li class="list-group-item">Ничего не найдено.</li>
     {% endfor %}
 </ul>
+
+<!-- Пагинация -->
+{% if page_obj.has_other_pages %}
+<nav>
+    <ul class="pagination">
+        {% if page_obj.has_previous %}
+            <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}&status={{ status_filter }}&sort={{ sort }}">Назад</a></li>
+        {% endif %}
+        <li class="page-item disabled"><span class="page-link">Стр. {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}</span></li>
+        {% if page_obj.has_next %}
+            <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}&status={{ status_filter }}&sort={{ sort }}">Вперед</a></li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
 {% endblock %}
