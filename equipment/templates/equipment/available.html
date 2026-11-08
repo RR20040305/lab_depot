@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}Свободное оборудование — lab_depot{% endblock %}
+
+{% block content %}
+<h1>Поиск свободного оборудования</h1>
+
+<form method="get" class="row g-3 mb-4">
+    <div class="col-auto">
+        <label for="status" class="form-label">Состояние:</label>
+        <select name="status" id="status" class="form-select">
+            <option value="исправно" {% if status_filter == 'исправно' %}selected{% endif %}>Исправно</option>
+            <option value="в ремонте" {% if status_filter == 'в ремонте' %}selected{% endif %}>В ремонте</option>
+        </select>
+    </div>
+    <div class="col-auto align-self-end">
+        <button type="submit" class="btn btn-primary">Найти</button>
+    </div>
+</form>
+
+<h2 class="h4">Доступное оборудование ({{ status_filter }})</h2>
+
+<ul class="list-group">
+    {% for eq in available_list %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            <a href="{% url 'equipment:detail' eq.inv_num %}">
+                {{ eq.name }} (Инв. №{{ eq.inv_num }})
+            </a>
+            <span class="badge bg-success">Свободно</span>
+        </li>
+    {% empty %}
+        <li class="list-group-item">Нет доступного оборудования с таким статусом.</li>
+    {% endfor %}
+</ul>
+
+<div class="mt-3">
+    <a href="{% url 'equipment:list' %}" class="btn btn-outline-secondary">← К общему списку</a>
+</div>
+{% endblock %}

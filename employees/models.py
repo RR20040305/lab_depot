@@ -1,22 +1,12 @@
 from django.db import models
 from laboratories.models import Laboratory
 
-
 class Employee(models.Model):
-    emp_id = models.CharField(
-        max_length=10, primary_key=True, verbose_name="Табельный номер"
-    )
-    fio = models.CharField(
-        max_length=150, verbose_name="ФИО"
-    )
-    position = models.CharField(
-        max_length=100, verbose_name="Должность"
-    )
+    emp_id = models.CharField(max_length=20, primary_key=True, verbose_name="Табельный номер")
+    fio = models.CharField(max_length=150, verbose_name="ФИО", help_text="Фамилия Имя Отчество")
+    position = models.CharField(max_length=100, verbose_name="Должность")
     lab = models.ForeignKey(
-        Laboratory,
-        on_delete=models.CASCADE,
-        related_name="employees",
-        verbose_name="Лаборатория"
+        Laboratory, on_delete=models.PROTECT, related_name="employees", verbose_name="Лаборатория"
     )
 
     def __str__(self):
